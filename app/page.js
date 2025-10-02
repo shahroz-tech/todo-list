@@ -1,103 +1,274 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [tasks, setTasks] = useState([
+    {
+      id: 1,
+      title: "Take tea",
+      description: "description",
+      doAt: "2/10/2025 18:00",
+      createdAt: "2/10/2025 11:12",
+      status: "completed",
+    },
+    {
+      id: 2,
+      title: "Title",
+      description: "description",
+      doAt: "2/10/2025 18:00",
+      createdAt: "2/10/2025 11:12",
+      status: "pending",
+    },
+  ]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const [isOpen, setIsOpen] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    doAt: "",
+    createdAt: new Date().toLocaleString(),
+    status: "pending",
+  });
+  const [updateTask, setUpdateTask] = useState({
+    id: "",
+    title: "",
+    description: "",
+    doAt: "",
+  });
+
+  const handleTaskSelected = (id) => {
+    const newTask = tasks.map((i) =>
+      i.id === id ? { ...i, status: "completed" } : i
+    );
+    setTasks(newTask);
+  };
+
+  const handleDeleteTask = (id) => {
+    setTasks(tasks.filter((i) => i.id !== id));
+  };
+
+  const handleUpdateTask = () => {
+    const updatedTask = tasks.map((i) =>
+      i.id === updateTask.id
+        ? {
+            ...i,
+            title: updateTask.title,
+            description: updateTask.description,
+            doAt: updateTask.doAt,
+          }
+        : i
+    );
+    setTasks(updatedTask);
+    setIsEdit(false);
+    setUpdateTask({ id: "", title: "", description: "", doAt: "" });
+  };
+
+  const handleAddTask = () => {
+    setTasks([...tasks, { ...newTask, id: tasks.length + 1 }]);
+    setIsOpen(false);
+    setNewTask({
+      title: "",
+      description: "",
+      doAt: "",
+      createdAt: new Date().toLocaleString(),
+      status: "pending",
+    });
+  };
+
+  return (
+    <>
+      <div className="max-w-3xl mx-auto my-10 px-5">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="font-extrabold text-4xl text-gray-800 tracking-tight">
+            Todo List
+          </h1>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium shadow hover:scale-105 transition"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            + Add Task
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        <div className="space-y-4">
+          {tasks.map((task) => (
+            <div
+              key={task.id}
+              className={`flex justify-between items-center p-5 rounded-xl shadow-md border transition hover:shadow-lg ${
+                task.status === "completed"
+                  ? "bg-gray-100 text-gray-500"
+                  : "bg-white"
+              }`}
+            >
+              <div className="flex items-start gap-4">
+                <input
+                  type="checkbox"
+                  checked={task.status === "completed"}
+                  disabled={task.status === "completed"}
+                  onChange={() => handleTaskSelected(task.id)}
+                  className="h-5 w-5 accent-indigo-600 mt-1"
+                />
+                <div>
+                  <h3
+                    className={`text-lg font-semibold ${
+                      task.status === "completed" ? "line-through" : ""
+                    }`}
+                  >
+                    {task.title}
+                  </h3>
+                  <p className="text-sm">{task.description}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Do on: {task.doAt}
+                  </p>
+                  <span
+                    className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${
+                      task.status === "completed"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {task.status}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleDeleteTask(task.id)}
+                  className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow"
+                >
+                  Delete
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEdit(true);
+                    setUpdateTask({
+                      id: task.id,
+                      title: task.title,
+                      description: task.description,
+                      doAt: task.doAt,
+                    });
+                  }}
+                  className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg shadow"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Update Task Modal */}
+      {isEdit && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-1/3 animate-fadeIn">
+            <h2 className="text-xl font-bold mb-4">Update Task</h2>
+            <div className="flex flex-col gap-3">
+              <input
+                type="text"
+                placeholder="Title"
+                value={updateTask.title}
+                onChange={(e) =>
+                  setUpdateTask({ ...updateTask, title: e.target.value })
+                }
+                className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <textarea
+                placeholder="Description"
+                value={updateTask.description}
+                onChange={(e) =>
+                  setUpdateTask({ ...updateTask, description: e.target.value })
+                }
+                className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <input
+                type="datetime-local"
+                value={updateTask.doAt}
+                onChange={(e) =>
+                  setUpdateTask({ ...updateTask, doAt: e.target.value })
+                }
+                className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+            <div className="flex justify-end gap-3 mt-5">
+              <button
+                onClick={() => setIsEdit(false)}
+                className="px-4 py-2 bg-gray-300 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateTask}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Task Modal */}
+      {isOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-1/3 animate-fadeIn">
+            <h2 className="text-xl font-bold mb-4">Add New Task</h2>
+            <div className="flex flex-col gap-3">
+              <input
+                type="text"
+                placeholder="Title"
+                value={newTask.title}
+                onChange={(e) =>  
+                  setNewTask({ ...newTask, title: e.target.value })
+                }
+                className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <textarea
+                placeholder="Description"
+                value={newTask.description}
+                onChange={(e) =>
+                  setNewTask({ ...newTask, description: e.target.value })
+                }
+                className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <input
+                type="datetime-local"
+                value={newTask.doAt}
+                onChange={(e) =>
+                  setNewTask({ ...newTask, doAt: e.target.value })
+                }
+                className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <select
+                value={newTask.status}
+                onChange={(e) =>
+                  setNewTask({ ...newTask, status: e.target.value })
+                }
+                className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div className="flex justify-end gap-3 mt-5">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 bg-gray-300 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddTask}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700"
+              >
+                Save Task
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
