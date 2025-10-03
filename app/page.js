@@ -5,6 +5,7 @@ export default function Home() {
   const [tasks, setTasks] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [prevTasks, setPrevTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
@@ -24,6 +25,7 @@ export default function Home() {
     const storedTasks = localStorage.getItem("tasks");
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
+      setPrevTasks(JSON.parse(storedTasks));
     }
   }, []);
 
@@ -37,6 +39,7 @@ export default function Home() {
       i.id === id ? { ...i, status: "completed" } : i
     );
     setTasks(newTask);
+    setPrevTasks(newTask);
   };
 
   const handleDeleteTask = (id) => {
@@ -47,14 +50,15 @@ export default function Home() {
     const updatedTask = tasks.map((i) =>
       i.id === updateTask.id
         ? {
-            ...i,
-            title: updateTask.title,
-            description: updateTask.description,
-            doAt: updateTask.doAt,
-          }
+          ...i,
+          title: updateTask.title,
+          description: updateTask.description,
+          doAt: updateTask.doAt,
+        }
         : i
     );
     setTasks(updatedTask);
+    setPrevTasks(updatedTask);
     setIsEdit(false);
     setUpdateTask({ id: "", title: "", description: "", doAt: "" });
   };
@@ -63,14 +67,24 @@ export default function Home() {
     const newId =
       tasks.length > 0 ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
     setTasks([...tasks, { ...newTask, id: newId }]);
-    setIsOpen(false);
-    setNewTask({
-      title: "",
-      description: "",
-      doAt: "",
-      createdAt: new Date().toLocaleString(),
-      status: "pending",
-    });
+    setPrevTasks([...tasks, { ...newTask, id: newId }]);
+    // setIsOpen(false);
+    // setNewTask({
+    //   title: "",
+    //   description: "",
+    //   doAt: "",
+    //   createdAt: new Date().toLocaleString(),
+    //   status: "pending",
+    // });
+  };
+  
+  const handleFilter = (f) => {
+    if (f === "all") {
+      setTasks(prevTasks); // reset to original list
+    } else {
+      const filteredTasks = prevTasks.filter((t) => t.status === f); // always filter from full list
+      setTasks(filteredTasks);
+    }
   };
 
   return (
@@ -87,17 +101,19 @@ export default function Home() {
             + Add Task
           </button>
         </div>
-
+        <div className="my-3">
+          <button onClick={() => { handleFilter('pending') }} className="bg-white outline outline-gray-400 rounded-sm px-3 py-1 mr-2 cursor-pointer   hover:bg-yellow-100 hover:text-yellow-700">Pending</button>
+          <button onClick={() => { handleFilter('completed') }} className="bg-white outline outline-gray-400 rounded-sm px-3 py-1 mr-2 cursor-pointer   hover:bg-green-100 hover:text-green-700">Completed</button><button onClick={() => { handleFilter('all') }} className="bg-white outline outline-gray-400 rounded-sm px-3 py-1 mr-2 cursor-pointer   hover:bg-black hover:text-white">All</button>
+        </div>
         <div className="space-y-4">
           {tasks.length > 0 ? (
             tasks.map((task) => (
               <div
                 key={task.id}
-                className={`flex justify-between items-center p-5 rounded-xl shadow-md border transition hover:shadow-lg ${
-                  task.status === "completed"
-                    ? "bg-gray-100 text-gray-500"
-                    : "bg-white"
-                }`}
+                className={`flex justify-between items-center p-5 rounded-xl shadow-md border transition hover:shadow-lg ${task.status === "completed"
+                  ? "bg-gray-100 text-gray-500"
+                  : "bg-white"
+                  }`}
               >
                 <div className="flex items-start gap-4">
                   <input
@@ -109,9 +125,8 @@ export default function Home() {
                   />
                   <div>
                     <h3
-                      className={`text-lg font-semibold ${
-                        task.status === "completed" ? "line-through" : ""
-                      }`}
+                      className={`text-lg font-semibold ${task.status === "completed" ? "line-through" : ""
+                        }`}
                     >
                       {task.title}
                     </h3>
@@ -120,11 +135,10 @@ export default function Home() {
                       Do on: {task.doAt}
                     </p>
                     <span
-                      className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${
-                        task.status === "completed"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
+                      className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${task.status === "completed"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
+                        }`}
                     >
                       {task.status}
                     </span>
@@ -160,6 +174,8 @@ export default function Home() {
           )}
         </div>
       </div>
+
+
 
       {/* Update Task Modal */}
       {isEdit && (
