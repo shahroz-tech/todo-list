@@ -6,6 +6,7 @@ export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [prevTasks, setPrevTasks] = useState([]);
+  const [filter, setFilter] = useState('all')
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
@@ -20,7 +21,7 @@ export default function Home() {
     doAt: "",
   });
 
-  // Load tasks from localStorage on mount
+  //  Load tasks from localStorage on mount
   useEffect(() => {
     const storedTasks = localStorage.getItem("tasks");
     if (storedTasks) {
@@ -35,7 +36,7 @@ export default function Home() {
   }, [tasks]);
 
   const handleTaskSelected = (id) => {
-    const newTask = tasks.map((i) =>
+    const newTask = prevTasks.map((i) =>
       i.id === id ? { ...i, status: "completed" } : i
     );
     setTasks(newTask);
@@ -68,17 +69,18 @@ export default function Home() {
       tasks.length > 0 ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
     setTasks([...tasks, { ...newTask, id: newId }]);
     setPrevTasks([...tasks, { ...newTask, id: newId }]);
-    // setIsOpen(false);
-    // setNewTask({
-    //   title: "",
-    //   description: "",
-    //   doAt: "",
-    //   createdAt: new Date().toLocaleString(),
-    //   status: "pending",
-    // });
+    setIsOpen(false);
+    setNewTask({
+      title: "",
+      description: "",
+      doAt: "",
+      createdAt: new Date().toLocaleString(),
+      status: "pending",
+    });
   };
-  
+
   const handleFilter = (f) => {
+    setFilter(f)
     if (f === "all") {
       setTasks(prevTasks); // reset to original list
     } else {
@@ -102,8 +104,8 @@ export default function Home() {
           </button>
         </div>
         <div className="my-3">
-          <button onClick={() => { handleFilter('pending') }} className="bg-white outline outline-gray-400 rounded-sm px-3 py-1 mr-2 cursor-pointer   hover:bg-yellow-100 hover:text-yellow-700">Pending</button>
-          <button onClick={() => { handleFilter('completed') }} className="bg-white outline outline-gray-400 rounded-sm px-3 py-1 mr-2 cursor-pointer   hover:bg-green-100 hover:text-green-700">Completed</button><button onClick={() => { handleFilter('all') }} className="bg-white outline outline-gray-400 rounded-sm px-3 py-1 mr-2 cursor-pointer   hover:bg-black hover:text-white">All</button>
+          <button onClick={() => { handleFilter('pending') }} className={`outline outline-gray-400 rounded-sm px-3 py-1 mr-2 cursor-pointer   hover:bg-yellow-100 hover:text-yellow-700 ${filter === 'pending'?'bg-yellow-100 text-yellow-700':'bg-white'}`}>Pending</button>
+          <button onClick={() => { handleFilter('completed') }} className={`outline outline-gray-400 rounded-sm px-3 py-1 mr-2 cursor-pointer   hover:bg-green-100 hover:text-green-700 ${filter === 'completed' ? 'bg-green-100 text-green-700' : 'bg-white '}`}>Completed</button><button onClick={() => { handleFilter('all') }} className={`outline outline-gray-400 rounded-sm px-3 py-1 mr-2 cursor-pointer hover:bg-black hover:text-white ${filter === 'all' ? 'bg-black text-white' : 'bg-white '}`}>All</button>
         </div>
         <div className="space-y-4">
           {tasks.length > 0 ? (
