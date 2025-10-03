@@ -1,26 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      title: "Take tea",
-      description: "description",
-      doAt: "2/10/2025 18:00",
-      createdAt: "2/10/2025 11:12",
-      status: "completed",
-    },
-    {
-      id: 2,
-      title: "Title",
-      description: "description",
-      doAt: "2/10/2025 18:00",
-      createdAt: "2/10/2025 11:12",
-      status: "pending",
-    },
-  ]);
-
+  const [tasks, setTasks] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [newTask, setNewTask] = useState({
@@ -36,6 +18,19 @@ export default function Home() {
     description: "",
     doAt: "",
   });
+
+  // Load tasks from localStorage on mount
+  useEffect(() => {
+    const storedTasks = localStorage.getItem("tasks");
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    }
+  }, []);
+
+  // Save tasks to localStorage whenever tasks change
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
 
   const handleTaskSelected = (id) => {
     const newTask = tasks.map((i) =>
@@ -65,7 +60,9 @@ export default function Home() {
   };
 
   const handleAddTask = () => {
-    setTasks([...tasks, { ...newTask, id: tasks.length + 1 }]);
+    const newId =
+      tasks.length > 0 ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+    setTasks([...tasks, { ...newTask, id: newId }]);
     setIsOpen(false);
     setNewTask({
       title: "",
@@ -92,71 +89,75 @@ export default function Home() {
         </div>
 
         <div className="space-y-4">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className={`flex justify-between items-center p-5 rounded-xl shadow-md border transition hover:shadow-lg ${
-                task.status === "completed"
-                  ? "bg-gray-100 text-gray-500"
-                  : "bg-white"
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                <input
-                  type="checkbox"
-                  checked={task.status === "completed"}
-                  disabled={task.status === "completed"}
-                  onChange={() => handleTaskSelected(task.id)}
-                  className="h-5 w-5 accent-indigo-600 mt-1"
-                />
-                <div>
-                  <h3
-                    className={`text-lg font-semibold ${
-                      task.status === "completed" ? "line-through" : ""
-                    }`}
+          {tasks.length > 0 ? (
+            tasks.map((task) => (
+              <div
+                key={task.id}
+                className={`flex justify-between items-center p-5 rounded-xl shadow-md border transition hover:shadow-lg ${
+                  task.status === "completed"
+                    ? "bg-gray-100 text-gray-500"
+                    : "bg-white"
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  <input
+                    type="checkbox"
+                    checked={task.status === "completed"}
+                    disabled={task.status === "completed"}
+                    onChange={() => handleTaskSelected(task.id)}
+                    className="h-5 w-5 accent-indigo-600 mt-1"
+                  />
+                  <div>
+                    <h3
+                      className={`text-lg font-semibold ${
+                        task.status === "completed" ? "line-through" : ""
+                      }`}
+                    >
+                      {task.title}
+                    </h3>
+                    <p className="text-sm">{task.description}</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Do on: {task.doAt}
+                    </p>
+                    <span
+                      className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${
+                        task.status === "completed"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {task.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleDeleteTask(task.id)}
+                    className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow"
                   >
-                    {task.title}
-                  </h3>
-                  <p className="text-sm">{task.description}</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Do on: {task.doAt}
-                  </p>
-                  <span
-                    className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${
-                      task.status === "completed"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEdit(true);
+                      setUpdateTask({
+                        id: task.id,
+                        title: task.title,
+                        description: task.description,
+                        doAt: task.doAt,
+                      });
+                    }}
+                    className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg shadow"
                   >
-                    {task.status}
-                  </span>
+                    Edit
+                  </button>
                 </div>
               </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleDeleteTask(task.id)}
-                  className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow"
-                >
-                  Delete
-                </button>
-                <button
-                  onClick={() => {
-                    setIsEdit(true);
-                    setUpdateTask({
-                      id: task.id,
-                      title: task.title,
-                      description: task.description,
-                      doAt: task.doAt,
-                    });
-                  }}
-                  className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg shadow"
-                >
-                  Edit
-                </button>
-              </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center text-lg">No tasks yet</p>
+          )}
         </div>
       </div>
 
@@ -179,7 +180,10 @@ export default function Home() {
                 placeholder="Description"
                 value={updateTask.description}
                 onChange={(e) =>
-                  setUpdateTask({ ...updateTask, description: e.target.value })
+                  setUpdateTask({
+                    ...updateTask,
+                    description: e.target.value,
+                  })
                 }
                 className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
@@ -220,7 +224,7 @@ export default function Home() {
                 type="text"
                 placeholder="Title"
                 value={newTask.title}
-                onChange={(e) =>  
+                onChange={(e) =>
                   setNewTask({ ...newTask, title: e.target.value })
                 }
                 className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
